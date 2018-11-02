@@ -1,0 +1,41 @@
+import kit.vector;
+
+trait Component
+{
+    function typeIdentifier(): CString;
+}
+
+struct Entity
+{
+    private var componentsList: Vector[Box[Component]]; 
+    public var uniqueID: Uint32;
+    public var name : CString;
+    private static var id : Uint32 = 0;
+
+    public static function new(allocator: Box[Allocator], name: CString) : Entity using implicit allocator
+    {
+        var componentsList: Vector[Box[Component]] = Vector.new(10);
+        var uniqueID: Uint32 = Entity.id++;
+
+        return struct Self
+        {
+            componentsList,
+            uniqueID,
+            name, 
+        };
+    }
+
+    public function addComponent(component: Component)
+    {
+        
+    }
+}
+
+function main()
+{
+    var entity1 : Entity = Entity.new("Apple");
+    var entity2 : Entity = Entity.new("Orange");
+
+    printf("%d", entity1.uniqueID);
+    printf("%d", entity2.uniqueID);
+}
