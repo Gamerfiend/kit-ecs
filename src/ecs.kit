@@ -1,29 +1,27 @@
 import kit.vector;
 import kit.map;
 
-trait Component
-{
+trait Component {
     function typeIdentifier(): CString;
 }
 
-struct Entity
-{
+struct Entity {
     //will be changed to a hashmap when it is avalible for use
-    private var componentsList: Vector[Box[Component]]; 
+    private var components: Map[CString, Box[Component]]; 
     public var uniqueID: Uint32;
-    public var name : CString;
+    public var name: CString;
     private var allocator: Box[Allocator];
     
-    private static var id : Uint32 = 0;
+    private static var id: Uint32 = 0;
 
-    public static function new(allocator: Box[Allocator], name: CString) : Entity using implicit allocator
+    public static function new(allocator: Box[Allocator], name: CString): Entity using implicit allocator
     {
-        var componentsList: Vector[Box[Component]] = Vector.new(10);
+        var components = Map.new(10);
         var uniqueID: Uint32 = Entity.id++;
 
         return struct Self
         {
-            componentsList,
+            components,
             uniqueID,
             name,
             allocator
@@ -34,21 +32,14 @@ struct Entity
     {
         if(!(this.contains(component)))
         {
-            this.componentsList.push(component);
+            this.components.put(component.typeIdentifier() ,component);
         }
     }
 
     //this is Log(n), will need to be changed when map is ready for use
-    private function contains(component : Box[Component]): Bool
+    private function contains(component: Box[Component]): Bool
     {
-        for i in 0 ... this.componentsList.length
-        {
-            if(this.componentsList[i].typeIdentifier() == component.typeIdentifier())
-            {
-                return true;
-            }
-        }
-        return false;
+        return this.components.exists(component.typeIdentifier());
     }
 }
 
