@@ -3,6 +3,7 @@ import kit.map;
 
 trait Component {
     function typeIdentifier(): CString;
+    function component(): Ptr[Void];
 }
 
 struct Entity {
@@ -32,14 +33,43 @@ struct Entity {
     {
         if(!(this.contains(component)))
         {
-            this.components.put(component.typeIdentifier() ,component);
+            this.components.put(component.typeIdentifier(), component);
+        }
+        else
+        {
+            this.components.remove(component.typeIdentifier());
+            this.components.put(component.typeIdentifier(), component);
         }
     }
 
-    //this is Log(n), will need to be changed when map is ready for use
+    public function getComponent(typeIdentifier: CString): Box[Component]
+    {
+        if(this.components.exists(typeIdentifier))
+        {
+            return this.components.get(typeIdentifier).unwrap();
+        }
+    }
+
     private function contains(component: Box[Component]): Bool
     {
         return this.components.exists(component.typeIdentifier());
+    }
+}
+
+struct PositionComponent{
+    var x: Float;
+    var y: Float;
+    var z: Float;
+}
+
+implement Component for PositionComponent{
+    function typeIdentifier(): CString{
+        return "Position";
+    }
+
+    function component(): Ptr[Void]
+    {
+        return &this;
     }
 }
 
@@ -48,6 +78,14 @@ function main()
     var entity1 : Entity = Entity.new("Apple");
     var entity2 : Entity = Entity.new("Orange");
 
-    printf("%d", entity1.uniqueID);
-    printf("%d", entity2.uniqueID);
+    var positionComponent = struct PositionComponent{
+        x: 12.0,
+        y: 12.0,
+        z: 12.0
+    };
+
+    var boxComponent: Box[Component] = positionComponent;
+    entity1.addComponent(boxComponent);
+
+    var returnedBoxedComponent: Box[Component] = entity1.getComponent("PositionComponent");
 }
