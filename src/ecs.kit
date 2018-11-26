@@ -3,7 +3,9 @@ import kit.map;
 
 trait Component {
     function typeIdentifier(): CString;
-    function component(): Ptr[Void];
+    function component(): Ptr[Void]{
+        return &this;
+    }
 }
 
 struct Entity {
@@ -54,6 +56,11 @@ struct Entity {
     {
         return this.components.exists(component.typeIdentifier());
     }
+
+    public function removeComponent(typeIdentifier: CString): Void
+    {
+        this.components.remove(typeIdentifier);
+    }
 }
 
 struct PositionComponent{
@@ -65,11 +72,6 @@ struct PositionComponent{
 implement Component for PositionComponent{
     function typeIdentifier(): CString{
         return "Position";
-    }
-
-    function component(): Ptr[Void]
-    {
-        return &this;
     }
 }
 
@@ -88,4 +90,8 @@ function main()
     entity1.addComponent(boxComponent);
 
     var returnedBoxedComponent: Box[Component] = entity1.getComponent("Position");
+
+    var ptrPosition: Ptr[PositionComponent] = returnedBoxedComponent.component();
+
+    printf("%f\n", ptrPosition.x);
 }
