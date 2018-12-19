@@ -7,6 +7,10 @@ trait Component {
     }
 }
 
+trait System {
+    public function update(): Void;
+}
+
 struct Entity {
     private var components: Map[CString, Box[Component]]; 
     public var uniqueID: Uint32;
@@ -55,4 +59,8 @@ struct Entity {
     public function removeComponent(typeIdentifier: CString): Void {
         this.components.remove(typeIdentifier);
     }
+}
+
+struct Engine {
+    
 }
