@@ -15,13 +15,11 @@ struct Entity {
     
     private static var id: Uint32 = 0;
 
-    public static function new(allocator: Box[Allocator], name: CString): Entity using implicit allocator
-    {
+    public static function new(allocator: Box[Allocator], name: CString): Entity using implicit allocator {
         var components = Map.new(10);
         var uniqueID: Uint32 = Entity.id++;
 
-        return struct Self
-        {
+        return struct Self {
             components,
             uniqueID,
             name,
@@ -29,40 +27,32 @@ struct Entity {
         };
     }
 
-    public function addComponent(component: Box[Component])
-    {
-        if(!(this.containsComponent(component)))
-        {
+    public function addComponent(component: Box[Component]) {
+        if !this.containsComponent(component)  {
             this.components.put(component.typeIdentifier(), component);
         }
-        else
-        {
+        else {
             this.components.remove(component.typeIdentifier());
             this.components.put(component.typeIdentifier(), component);
         }
     }
 
-    public function getComponent(typeIdentifier: CString): Option[Box[Component]]
-    {
-        if(this.components.exists(typeIdentifier))
-        {
+    public function getComponent(typeIdentifier: CString): Option[Box[Component]] {
+        if this.components.exists(typeIdentifier) {
             return this.components.get(typeIdentifier);
         }
         return None;
     }
 
-    public function getComponents(): Array[CString]
-    {
+    public function getComponents(): Array[CString] {
         return this.components.keys();
     }
 
-    public function containsComponent(component: Box[Component]): Bool
-    {
+    public function containsComponent(component: Box[Component]): Bool {
         return this.components.exists(component.typeIdentifier());
     }
 
-    public function removeComponent(typeIdentifier: CString): Void
-    {
+    public function removeComponent(typeIdentifier: CString): Void {
         this.components.remove(typeIdentifier);
     }
 }
