@@ -1,0 +1,36 @@
+import src.ecs;
+
+struct PositionComponent{
+    var x: Float;
+    var y: Float;
+    var z: Float;
+}
+
+implement Component for PositionComponent{
+    function typeIdentifier(): CString{
+        return "Position";
+    }
+}
+
+function main()
+{
+    var entity1 : Entity = Entity.new("Apple");
+
+    var positionComponent = struct PositionComponent{
+        x: 12.0,
+        y: 12.0,
+        z: 12.0
+    };
+
+    var boxComponent: Box[Component] = positionComponent;
+    entity1.addComponent(boxComponent);
+
+    if(entity1.getComponent("Position").isNone()){
+        
+    }
+    var returnedBoxedComponent: Box[Component] = entity1.getComponent("Position").unwrap();
+
+    var positionPtr = returnedBoxedComponent.base() as Ptr[PositionComponent];
+
+    printf("%f\n", positionPtr.x);
+}
