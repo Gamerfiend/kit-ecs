@@ -62,5 +62,43 @@ struct Entity {
 }
 
 struct Engine {
-    
+    private var entities: Vector[Entity];
+    private var systems: Vector[Box[System]];
+    private var entitesToComponent: Map[CString, Vector[Ptr[Entity]]];
+
+    public static function new(allocator: Box[Allocator]): Engine using implicit allocator {
+        var entities: Vector[Entity] = Vector.new(10);
+        var systems: Vector[Box[System]] = Vector.new(10);
+        var entitesToComponent: Map[CString, Vector[Ptr[Entity]]] = Map.new(10);
+
+        return struct Self {
+            entities,
+            systems,
+            entitesToComponent
+        };
+    }
+
+    public function addEntity(entity: Entity) {
+
+    }
+
+    public function removeEntity(entity: Entity) {
+
+    }
+
+    public function addSystem(system: Box[System]) {
+
+    }
+
+    public function removeSystem(system: Box[System]) {
+        
+    }
+
+    public function entitiesForComponent(type: CString): Array[Ptr[Entity]] {
+
+    }
+
+    public function update() {
+
+    }
 }
