@@ -16,6 +16,7 @@ struct Entity {
     public var uniqueID: Uint32;
     public var name: CString;
     private var allocator: Box[Allocator];
+    public var engine: Ptr[Engine];
     
     private static var id: Uint32 = 0;
 
@@ -27,7 +28,8 @@ struct Entity {
             components,
             uniqueID,
             name,
-            allocator
+            allocator,
+            engine: null
         };
     }
 
@@ -62,28 +64,47 @@ struct Entity {
 }
 
 struct Engine {
-    private var entities: Vector[Entity];
+    private var entities: Map[Int, Entity];
     private var systems: Vector[Box[System]];
     private var entitesToComponent: Map[CString, Vector[Ptr[Entity]]];
+    private var allocator: Box[Allocator];
 
     public static function new(allocator: Box[Allocator]): Engine using implicit allocator {
-        var entities: Vector[Entity] = Vector.new(10);
+        var entities: Map[Int, Entity] = Map.new(10);
         var systems: Vector[Box[System]] = Vector.new(10);
         var entitesToComponent: Map[CString, Vector[Ptr[Entity]]] = Map.new(10);
 
         return struct Self {
             entities,
             systems,
-            entitesToComponent
+            entitesToComponent,
+            allocator
         };
     }
 
     public function addEntity(entity: Entity) {
-
+        this.entities.put(entity.uniqueID, entity);
+        entity.engine = &this;
     }
 
     public function removeEntity(entity: Entity) {
+        if(this.entities.exists(entity.uniqueID)) {
+            this.entities.remove(entity.uniqueID);
+            var list = entity.getComponents();
+            for type in list{
+                var entityVec: Vector[Ptr[Entity]] = this.entitesToComponent.get(type).unwrap();
+                var counter = 0;
+                for ent in entityVec{
+                    if(ent != null && (ent.uniqueID == entity.uniqueID)){
+                        entityVec[counter] = null;
+                        break;
+                    }
+                    counter++;
+                }
+            }
 
+            entity.engine = null;
+        }
     }
 
     public function addSystem(system: Box[System]) {

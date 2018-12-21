@@ -15,6 +15,7 @@ implement Component for PositionComponent{
 function main()
 {
     var entity1 : Entity = Entity.new("Apple");
+    var engine: Engine = Engine.new();
 
     var positionComponent = struct PositionComponent{
         x: 12.0,
@@ -25,6 +26,8 @@ function main()
     var boxComponent: Box[Component] = positionComponent;
     entity1.addComponent(boxComponent);
 
+    engine.addEntity(entity1);
+    printf("%i\n", );
     if(entity1.getComponent("Position").isNone()){
         
     }
