@@ -177,8 +177,10 @@ struct Engine {
         if this.entitesToComponent.exists(type) {
             var entitySet = this.entitesToComponent.get(type).unwrap();
             var entityArray: Array[Ptr[Entity]] = Array.new(entitySet.length); 
+            var i = 0;
             for key in entitySet{
                 entityArray[i] = this.entities.get(key).unwrap();
+                i++;
             }
         }
     }
