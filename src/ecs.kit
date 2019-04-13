@@ -27,15 +27,15 @@ trait System {
 struct Entity {
     private var components: Map[CString, Box[Component]]; 
     private var allocator: Box[Allocator];
-    public var uniqueID: Uint32;
+    public var uniqueID: Int;
     public var name: CString;
     private var engine: Ptr[Engine];
     
-    private static var id: Uint32 = 0;
+    private static var id: Int = 0;
 
     public static function new(allocator: Box[Allocator], name: CString): Entity using implicit allocator {
         var components = Map.new(10);
-        var uniqueID: Uint32 = Entity.id++;
+        var uniqueID: Int = Entity.id++;
 
         return struct Self {
             components,
@@ -112,15 +112,10 @@ struct Engine {
             var list = entity.getComponents();
 
             for type in list{
-                if(this.entitesToComponent.exists(type)) {
-                    var entitySet: Set[Int] = this.entitesToComponent.get(type).unwrap();
-                    entitySet.put(entity.uniqueID);
+                if(!this.entitesToComponent.exists(type)) {
+                    this.entitesToComponent.put(type, Set.new());
                 }
-                else {
-                    var entitySet: Set[Int] = Set.new();
-                    entitySet.put(entity.uniqueID);
-                    this.entitesToComponent.put(type, entitySet);
-                }
+                this.addComponentFromEntity(type, entity.uniqueID);
             }
         }
     }
@@ -133,15 +128,33 @@ struct Engine {
 
             for type in list{
                 if(this.entitesToComponent.exists(type)) {
-                    var entitySet: Set[Int] = this.entitesToComponent.get(type).unwrap();
-                    entitySet.remove(entity.uniqueID);
+                    this.removeComponentFromEntity(type, entity.uniqueID);
                 }
             }
         }
     }
 
-    public function entityHasChanged(change: EntityState, typeIdentifier: CString, entityID: Uint32){
+    public function entityHasChanged(change: EntityState, typeIdentifier: CString, entityID: Int){
         printf("Entity: %i, has %s, Component: %s\n", entityID, change.toString(), typeIdentifier);
+
+        match(change.toString()){
+            "added" => this.addComponentFromEntity(typeIdentifier, entityID);
+            "removed" => this.removeComponentFromEntity(typeIdentifier, entityID);
+        }
+    }
+
+    private function addComponentFromEntity(type: CString, en: Int){
+        if(this.entitesToComponent.exists(type)){
+            var entitySet: Set[Int] = this.entitesToComponent.get(type).unwrap();
+            entitySet.put(en);
+        }
+    }
+
+    private function removeComponentFromEntity(type: CString, en: Int){
+        if(this.entitesToComponent.exists(type)){
+            var entitySet: Set[Int] = this.entitesToComponent.get(type).unwrap();
+            entitySet.remove(en);
+        }
     }
 
     public function addSystem(system: Box[System]) {
