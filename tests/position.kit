@@ -23,17 +23,12 @@ function main()
         z: 12.0
     };
 
-    var boxComponent: Box[Component] = positionComponent;
-    entity1.addComponent(boxComponent);
 
     engine.addEntity(entity1);
-    printf("%i\n", );
-    if(entity1.getComponent("Position").isNone()){
-        
-    }
+    entity1.addComponent(positionComponent);
     var returnedBoxedComponent: Box[Component] = entity1.getComponent("Position").unwrap();
 
-    var positionPtr = returnedBoxedComponent.base() as Ptr[PositionComponent];
+    var positionPtr: Ptr[PositionComponent] = returnedBoxedComponent.base();
 
     printf("%f\n", positionPtr.x);
 }

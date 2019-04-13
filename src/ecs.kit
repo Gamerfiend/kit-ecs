@@ -1,5 +1,17 @@
 import kit.map;
 
+enum EntityState{
+    COMPONENT_ADDED;
+    COMPONENT_REMOVED;
+
+    public function toString(): CString{
+        match this{
+            COMPONENT_ADDED => return "added";
+            COMPONENT_REMOVED => return "removed";
+        }
+    }
+}
+
 trait Component {
     function typeIdentifier(): CString;
     public function base(): Ptr[Void]{
@@ -13,10 +25,10 @@ trait System {
 
 struct Entity {
     private var components: Map[CString, Box[Component]]; 
+    private var allocator: Box[Allocator];
     public var uniqueID: Uint32;
     public var name: CString;
-    private var allocator: Box[Allocator];
-    public var engine: Ptr[Engine];
+    private var engine: Ptr[Engine];
     
     private static var id: Uint32 = 0;
 
@@ -26,16 +38,16 @@ struct Entity {
 
         return struct Self {
             components,
+            allocator,
             uniqueID,
             name,
-            allocator,
-            engine: null
         };
     }
 
     public function addComponent(component: Box[Component]) {
-        if !this.containsComponent(component)  {
+        if !this.containsComponent(component.typeIdentifier())  {
             this.components.put(component.typeIdentifier(), component);
+            this.notifiyChange(EntityState.COMPONENT_ADDED, component.typeIdentifier());
         }
         else {
             this.components.remove(component.typeIdentifier());
@@ -54,12 +66,19 @@ struct Entity {
         return this.components.keys();
     }
 
-    public function containsComponent(component: Box[Component]): Bool {
-        return this.components.exists(component.typeIdentifier());
+    public function containsComponent(type: CString): Bool {
+        return this.components.exists(type);
     }
 
     public function removeComponent(typeIdentifier: CString): Void {
-        this.components.remove(typeIdentifier);
+        if(this.containsComponent(typeIdentifier)){
+            this.components.remove(typeIdentifier);
+            this.notifiyChange(EntityState.COMPONENT_REMOVED, typeIdentifier);
+        }
+    }
+
+    private function notifiyChange(change: EntityState, typeIdentifier: CString){
+        this.engine.entityHasChanged(change, typeIdentifier, this.uniqueID);
     }
 }
 
@@ -103,8 +122,11 @@ struct Engine {
                 }
             }
 
-            entity.engine = null;
         }
+    }
+
+    public function entityHasChanged(change: EntityState, typeIdentifier: CString, entityID: Uint32){
+        printf("Entity: %i, has %s, Component: %s\n", entityID, change.toString(), typeIdentifier);
     }
 
     public function addSystem(system: Box[System]) {
