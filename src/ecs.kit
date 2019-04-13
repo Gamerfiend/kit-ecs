@@ -21,7 +21,11 @@ trait Component {
 }
 
 trait System {
-    public function update(): Void;
+    public function update(delta: Float): Void;
+    function typeIdentifier(): CString;
+    public function base(): Ptr[Void]{
+        return &this;
+    }
 }
 
 struct Entity {
@@ -85,13 +89,13 @@ struct Entity {
 
 struct Engine {
     private var entities: Map[Int, Ptr[Entity]];
-    private var systems: Vector[Box[System]];
+    private var systems: Map[CString, Box[System]];
     private var entitesToComponent: Map[CString, Set[Int]];
     private var allocator: Box[Allocator];
 
     public static function new(allocator: Box[Allocator]): Engine using implicit allocator {
         var entities: Map[Int, Ptr[Entity]] = Map.new(10);
-        var systems: Vector[Box[System]] = Vector.new(10);
+        var systems: Map[CString, Box[System]] = Map.new(10);
         var entitesToComponent: Map[CString, Set[Int]] = Map.new(10);
 
         return struct Self {
@@ -157,19 +161,32 @@ struct Engine {
         }
     }
 
-    public function addSystem(system: Box[System]) {
-
+    public function addSystem(type: CString, system: Box[System]) {
+        if(!this.systems.exists(type)){
+            this.systems.put(type, system);
+        }
     }
 
-    public function removeSystem(system: Box[System]) {
-        
+    public function removeSystem(type: CString, system: Box[System]) {
+        if(!this.systems.exists(type)){
+            this.systems.remove(type);
+        }
     }
 
-    public function entitiesForComponent(type: CString): Array[Ptr[Entity]] {
+    // set struct needs for loop
+    // public function entitiesForComponent(type: CString): Array[Ptr[Entity]] {
+    //     if this.entitesToComponent.exists(type) {
+    //         var entitySet = this.entitesToComponent.get(type).unwrap();
+    //         var entityArray: Array[Ptr[Entity]] = Array.new(entitySet.length); 
+    //         for i in 1 ... entitySet.length {
+    //             entityArray[i] = this.entites.get()
+    //         }
+    //     }
+    // }
 
-    }
-
-    public function update() {
-
+    public function update(delta: Float) {
+        for key in this.systems {
+            this.systems.get(key).unwrap().update(delta);
+        }
     }
 }
