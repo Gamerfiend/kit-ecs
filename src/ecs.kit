@@ -1,4 +1,5 @@
 import kit.map;
+import utils.set;
 
 enum EntityState{
     COMPONENT_ADDED;
@@ -83,15 +84,15 @@ struct Entity {
 }
 
 struct Engine {
-    private var entities: Map[Int, Entity];
+    private var entities: Map[Int, Ptr[Entity]];
     private var systems: Vector[Box[System]];
-    private var entitesToComponent: Map[CString, Vector[Ptr[Entity]]];
+    private var entitesToComponent: Map[CString, Set[Int]];
     private var allocator: Box[Allocator];
 
     public static function new(allocator: Box[Allocator]): Engine using implicit allocator {
-        var entities: Map[Int, Entity] = Map.new(10);
+        var entities: Map[Int, Ptr[Entity]] = Map.new(10);
         var systems: Vector[Box[System]] = Vector.new(10);
-        var entitesToComponent: Map[CString, Vector[Ptr[Entity]]] = Map.new(10);
+        var entitesToComponent: Map[CString, Set[Int]] = Map.new(10);
 
         return struct Self {
             entities,
@@ -101,27 +102,41 @@ struct Engine {
         };
     }
 
-    public function addEntity(entity: Entity) {
-        this.entities.put(entity.uniqueID, entity);
-        entity.engine = &this;
+    public function addEntity(entity: Ptr[Entity]) {
+        
+
+        if(!this.entities.exists(entity.uniqueID)) {
+            this.entities.put(entity.uniqueID, entity);
+            entity.engine = &this;
+
+            var list = entity.getComponents();
+
+            for type in list{
+                if(this.entitesToComponent.exists(type)) {
+                    var entitySet: Set[Int] = this.entitesToComponent.get(type).unwrap();
+                    entitySet.put(entity.uniqueID);
+                }
+                else {
+                    var entitySet: Set[Int] = Set.new();
+                    entitySet.put(entity.uniqueID);
+                    this.entitesToComponent.put(type, entitySet);
+                }
+            }
+        }
     }
 
     public function removeEntity(entity: Entity) {
         if(this.entities.exists(entity.uniqueID)) {
             this.entities.remove(entity.uniqueID);
+
             var list = entity.getComponents();
+
             for type in list{
-                var entityVec: Vector[Ptr[Entity]] = this.entitesToComponent.get(type).unwrap();
-                var counter = 0;
-                for ent in entityVec{
-                    if(ent != null && (ent.uniqueID == entity.uniqueID)){
-                        entityVec[counter] = null;
-                        break;
-                    }
-                    counter++;
+                if(this.entitesToComponent.exists(type)) {
+                    var entitySet: Set[Int] = this.entitesToComponent.get(type).unwrap();
+                    entitySet.remove(entity.uniqueID);
                 }
             }
-
         }
     }
 
