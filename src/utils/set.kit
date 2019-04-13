@@ -12,11 +12,11 @@ trait Hashable {
     function hash(): Int;
 }
 
-enum HashCellState {
-    Empty;
-    Deleted;
-    Occupied;
-}
+// enum HashCellState {
+//     Empty;
+//     Deleted;
+//     Occupied;
+// }
 
 struct Set[T] {
     static const internalArrayThreshold: Float = 0.7;
@@ -96,6 +96,21 @@ struct Set[T] {
     public function clear(): Void {
         this.internalArray.clear();
         this.length = 0;
+    }
+
+     rules {
+        ($this[$k]) => $this.put($k);
+
+        (for $ident in $this {$e}) => {
+            var __length = $this.internalArray.length;
+            for __i in 0 ... __length {
+                var __slot = $this.internalArray[__i];
+                if __slot.state == HashCellState.Occupied {
+                    var $ident = __slot.data;
+                    {$e}
+                }
+            }
+        }
     }
 
  }

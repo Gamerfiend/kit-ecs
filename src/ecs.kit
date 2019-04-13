@@ -173,16 +173,15 @@ struct Engine {
         }
     }
 
-    // set struct needs for loop
-    // public function entitiesForComponent(type: CString): Array[Ptr[Entity]] {
-    //     if this.entitesToComponent.exists(type) {
-    //         var entitySet = this.entitesToComponent.get(type).unwrap();
-    //         var entityArray: Array[Ptr[Entity]] = Array.new(entitySet.length); 
-    //         for i in 1 ... entitySet.length {
-    //             entityArray[i] = this.entites.get()
-    //         }
-    //     }
-    // }
+    public function entitiesForComponent(type: CString): Array[Ptr[Entity]] {
+        if this.entitesToComponent.exists(type) {
+            var entitySet = this.entitesToComponent.get(type).unwrap();
+            var entityArray: Array[Ptr[Entity]] = Array.new(entitySet.length); 
+            for key in entitySet{
+                entityArray[i] = this.entities.get(key).unwrap();
+            }
+        }
+    }
 
     public function update(delta: Float) {
         for key in this.systems {
