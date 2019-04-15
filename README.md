@@ -1,7 +1,7 @@
 kit-ecs
 ======
-### Kit implementation of Entity/Component/System paradigm
-------
+#### Kit implementation of Entity/Component/System paradigm
+
 Quick Start Guide
 ------
 
@@ -91,7 +91,7 @@ implement System for MovementSystem{
 ```
 `Trait System` requires `struct` to define two methods, `update(delta: Float, engine: Ptr[Engine])` and `typeIdentifier()`, the later returns a unique `CString` identifer for this system. The former method is called each iteration of the engine update method, and is passed the delta time and a pointer to the `Engine` itself for querying.
 
-You would then add the system itself to the engine.
+You would then add the `system` itself to the `engine`.
 ```c
 var movementSystem = struct MovementSystem{
     entityIsMoving: false
@@ -104,4 +104,4 @@ Inside your game loop, you would then call:
 ```c
 engine.update(GetDeltaTime());
 ```
-The engine will then call update on every system it has.
+The `engine` will then call update on every `system` it has.
