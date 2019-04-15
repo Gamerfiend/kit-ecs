@@ -26,8 +26,9 @@ trait Component {
 }
 
 trait System {
-    public function update(delta: Float): Void;
-    function typeIdentifier(): CString;
+    public static var engine: Ptr[Engine]; 
+    public function update(delta: Float, engine: Ptr[Engine]): Void;
+    public function typeIdentifier(): CString;
     public function base(): Ptr[Void]{
         return &this;
     }
@@ -57,12 +58,12 @@ struct Entity {
     public function addComponent(component: Box[Component]) {
         if !this.containsComponent(component.typeIdentifier())  {
             this.components.put(component.typeIdentifier(), component);
-            this.notifiyChange(EntityState.COMPONENT_ADDED, component.typeIdentifier());
         }
         else {
             this.components.remove(component.typeIdentifier());
             this.components.put(component.typeIdentifier(), component);
         }
+        this.notifiyChange(EntityState.COMPONENT_ADDED, component.typeIdentifier());
     }
 
     public function getComponent(typeIdentifier: CString): Option[Box[Component]] {
@@ -112,14 +113,11 @@ struct Engine {
     }
 
     public function addEntity(entity: Ptr[Entity]) {
-        
-
         if(!this.entities.exists(entity.uniqueID)) {
             this.entities.put(entity.uniqueID, entity);
             entity.engine = &this;
 
             var list = entity.getComponents();
-
             for type in list{
                 if(!this.entitesToComponent.exists(type)) {
                     this.entitesToComponent.put(type, Set.new());
@@ -157,6 +155,11 @@ struct Engine {
             var entitySet: Set[Int] = this.entitesToComponent.get(type).unwrap();
             entitySet.put(en);
         }
+        else{
+            var entitySet: Set[Int] = Set.new();
+            entitySet.put(en);
+            this.entitesToComponent.put(type,entitySet);
+        }
     }
 
     private function removeComponentFromEntity(type: CString, en: Int){
@@ -179,7 +182,7 @@ struct Engine {
     }
 
     public function entitiesForComponent(type: CString): Array[Ptr[Entity]] {
-        if this.entitesToComponent.exists(type) {
+        if(this.entitesToComponent.exists(type)) {
             var entitySet = this.entitesToComponent.get(type).unwrap();
             var entityArray: Array[Ptr[Entity]] = Array.new(entitySet.length); 
             var i = 0;
@@ -187,12 +190,14 @@ struct Engine {
                 entityArray[i] = this.entities.get(key).unwrap();
                 i++;
             }
+
+            return entityArray;
         }
     }
 
     public function update(delta: Float) {
         for key in this.systems {
-            this.systems.get(key).unwrap().update(delta);
+            this.systems.get(key).unwrap().update(delta, this);
         }
     }
 }
