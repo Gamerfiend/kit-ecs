@@ -16,12 +16,12 @@ implement System for PositionSystem{
         var entityArray = engine.entitiesForComponent("Position");
 
         for entity in entityArray{
-            printf("Entity: %s\n", entity.name);
+            printf("Entity: %s, has components: %i", entity.name, entity.components.length);
         }
 
-        printf("Array Length: %i\n", entityArray.length);
-        printf("%i\n", engine.entities.length);
-        printf("%i\n", engine.entitesToComponent.length);
+        printf("Entity Array Length: %i\n", entityArray.length);
+        printf("Engine Entity Length: %i\n", engine.entities.length);
+        printf("Components length: %i\n", engine.entitesToComponent.length);
     }
     function typeIdentifier(): CString {
         return "Position";
@@ -48,19 +48,16 @@ function main()
 
     engine.addEntity(entity1);
     entity1.addComponent(positionComponent);
-    //var returnedBoxedComponent: Box[Component] = entity1.getComponent("Position").unwrap();
+    var returnedBoxedComponent: Box[Component] = entity1.getComponent("Position").unwrap();
 
-    //var positionPtr: Ptr[PositionComponent] = returnedBoxedComponent.base();
+    var positionPtr: Ptr[PositionComponent] = returnedBoxedComponent.base();
 
     var posSystem = struct PositionSystem{
         blah: 1
     };
 
     engine.addSystem("Position", posSystem);
-    //printf("%f\n", positionPtr.x);
+    printf("%f\n", positionPtr.x);
     
     engine.update(2.2);
-
-
-
 }
