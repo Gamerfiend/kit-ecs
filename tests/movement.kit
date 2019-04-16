@@ -35,10 +35,11 @@ implement System for MovementSystem{
 
             var componentPosition = entity.getComponent("Position").unwrap().base() as Ptr[PositionComponent];
             var componentVelocity = entity.getComponent("Position").unwrap().base() as Ptr[VelocityComponent];
-
+            printf("Entity: %s - Position(%f, %f) Velocity(%f, %f)\n", entity.name, componentPosition.x, componentPosition.y, componentVelocity.x, componentVelocity.y);
             this.entityIsMoving = true;
             componentPosition.x += (componentVelocity.x * delta);
             componentPosition.y += (componentVelocity.y * delta);
+            printf("Entity: %s - Position(%f, %f) Velocity(%f, %f)\n", entity.name, componentPosition.x, componentPosition.y, componentVelocity.x, componentVelocity.y);
             this.entityIsMoving = false;
         }
     }
@@ -49,9 +50,11 @@ implement System for MovementSystem{
 
 function main() {
     var player: Entity = Entity.new("Player");
+    var enemy: Entity = Entity.new("Enemy");
     var engine: Engine = Engine.new();
 
     engine.addEntity(player);
+    engine.addEntity(enemy);
 
     var playerPosition: PositionComponent = struct PositionComponent {
         x: 12.0,
@@ -62,9 +65,21 @@ function main() {
         x: 1.2,
         y: 1.2
     };
+    var enemyPosition: PositionComponent = struct PositionComponent {
+        x: 2.0,
+        y: 45.0
+    };
+
+    var enemyVelocity: VelocityComponent = struct VelocityComponent {
+        x: 0.2,
+        y: 0.2
+    };
 
     player.addComponent(playerPosition);
     player.addComponent(playerVelocity);
+
+    enemy.addComponent(enemyPosition);
+    enemy.addComponent(enemyVelocity);
 
     var movementSystem = struct MovementSystem{
     entityIsMoving: false
