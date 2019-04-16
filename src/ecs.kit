@@ -186,16 +186,13 @@ struct Engine {
         var entitySet: Set[Int] = Set.new();
         for i in 0 ... components{
             var component: CString = types;
-            //get set for type
             var setRef = this.entitesToComponent.get(component).unwrap();
-            //union with entity set
+            
             entitySet.unionSet(setRef);
         } 
 
-        //get entites from set
-        //add to array
         var entityArray: Array[Ptr[Entity]] = Array.new(entitySet.length);
-
+        
         var i = 0;
         for entity in entitySet{
             entityArray[i] = this.entities.get(entity).unwrap();
