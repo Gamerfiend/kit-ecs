@@ -1,0 +1,77 @@
+import ecs;
+
+struct PositionComponent {
+    var x: Float;
+    var y: Float;
+}
+
+implement Component for PositionComponent{
+    function typeIdentifier(): CString{
+        return "Position";
+    }
+}
+
+struct VelocityComponent {
+    var x: Float;
+    var y: Float;
+}
+
+implement Component for VelocityComponent{
+    function typeIdentifier(): CString{
+        return "Velocity";
+    }
+}
+
+struct MovementSystem{
+    var entityIsMoving: Bool = false;
+}
+
+implement System for MovementSystem{
+
+    public function update(delta: Float, engine: Ptr[Engine]): Void{
+        var entitesWithPosition = engine.entitiesForComponents(2, "Position", "Velocity");
+
+        for entity in entitesWithPosition{
+
+            var componentPosition = entity.getComponent("Position").unwrap().base() as Ptr[PositionComponent];
+            var componentVelocity = entity.getComponent("Position").unwrap().base() as Ptr[VelocityComponent];
+
+            this.entityIsMoving = true;
+            componentPosition.x += (componentVelocity.x * delta);
+            componentPosition.y += (componentVelocity.y * delta);
+            this.entityIsMoving = false;
+        }
+    }
+    function typeIdentifier(): CString {
+        return "Position";
+    }
+}
+
+function main() {
+    var player: Entity = Entity.new("Player");
+    var engine: Engine = Engine.new();
+
+    engine.addEntity(player);
+
+    var playerPosition: PositionComponent = struct PositionComponent {
+        x: 12.0,
+        y: 12.0
+    };
+
+    var playerVelocity: VelocityComponent = struct VelocityComponent {
+        x: 1.2,
+        y: 1.2
+    };
+
+    player.addComponent(playerPosition);
+    player.addComponent(playerVelocity);
+
+    var movementSystem = struct MovementSystem{
+    entityIsMoving: false
+    };
+
+    engine.addSystem("Movement", movementSystem);
+
+    engine.update(3.2);
+}
+

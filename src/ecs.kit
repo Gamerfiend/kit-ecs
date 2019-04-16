@@ -181,6 +181,30 @@ struct Engine {
         }
     }
 
+    public function entitiesForComponents(components: Int, types...): Array[Ptr[Entity]] {
+
+        var entitySet: Set[Int] = Set.new();
+        for i in 0 ... components{
+            var component: CString = types;
+            //get set for type
+            var setRef = this.entitesToComponent.get(component).unwrap();
+            //union with entity set
+            entitySet.unionSet(setRef);
+        } 
+
+        //get entites from set
+        //add to array
+        var entityArray: Array[Ptr[Entity]] = Array.new(entitySet.length);
+
+        var i = 0;
+        for entity in entitySet{
+            entityArray[i] = this.entities.get(entity).unwrap();
+            i++;
+        }
+
+        return entityArray;
+    }
+
     public function entitiesForComponent(type: CString): Array[Ptr[Entity]] {
         if(this.entitesToComponent.exists(type)) {
             var entitySet = this.entitesToComponent.get(type).unwrap();

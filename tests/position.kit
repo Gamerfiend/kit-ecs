@@ -58,6 +58,8 @@ function main()
 
     engine.addSystem("Position", posSystem);
     printf("%f\n", positionPtr.x);
+
+    engine.entitiesForComponents(3, "Position", "Velocity", "Model");
     
     engine.update(2.2);
 }

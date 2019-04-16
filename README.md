@@ -59,12 +59,13 @@ var playerPosition: PositionComponent = struct PositionComponent {
     y: 12.0
 };
 
-var playerPosition: PositionComponent = struct VelocityComponent {
+var playerVelocity: VelocityComponent = struct VelocityComponent {
     x: 1.2,
     y: 1.2
 };
 
 player.addComponent(playerPosition);
+player.addComponent(playerVelocity);
 ```
 We've now done the `Entity` and `Component` section of ECS, now we should cover the `System`.
 ```c
@@ -75,12 +76,16 @@ struct MovementSystem{
 implement System for MovementSystem{
 
     public function update(delta: Float, engine: Ptr[Engine]): Void{
-        var entitesWithPosition = engine.entitiesForComponent("Position");
+        var entitesWithPosition = engine.entitiesForComponents(2, "Position", "Velocity");
 
-        for entity in entityArray{
+        for entity in entitesWithPosition{
+
+            var componentPosition = entity.getComponent("Position").unwrap().base() as Ptr[PositionComponent];
+            var componentVelocity = entity.getComponent("Position").unwrap().base() as Ptr[VelocityComponent];
+
             this.entityIsMoving = true;
-            entity.getComponent("Position").unwrap().x += (entity.getComponent("Velocity").unwrap.x * delta);
-            entity.getComponent("Position").unwrap().y += (entity.getComponent("Velocity").unwrap.y * delta);
+            componentPosition.x += (componentVelocity.x * delta);
+            componentPosition.y += (componentVelocity.y * delta);
             this.entityIsMoving = false;
         }
     }
@@ -97,7 +102,7 @@ var movementSystem = struct MovementSystem{
     entityIsMoving: false
 };
 
-engine.addSystem(movementSystem);
+engine.addSystem(movementSystem.typeIdentifier(), movementSystem);
 ```
 
 Inside your game loop, you would then call:
