@@ -4,8 +4,13 @@
  */
 
 import kit.map;
-import utils.set;
+import kit.set;
 
+/**
+ * Enum which describes an event state for which an Entity may be in, used in case an Entity has a 
+ * Component added or removed at runtime.
+ *
+ */
 enum EntityState{
     COMPONENT_ADDED;
     COMPONENT_REMOVED;
@@ -18,17 +23,51 @@ enum EntityState{
     }
 }
 
+/**
+ * Component trait, any component struct must implement
+ */
 trait Component {
+
+    /**
+     * Return the unique type for this component, i.e "Position"
+     * @return {CString}
+     */
     function typeIdentifier(): CString;
+
+    /**
+     * Returns a pointer to the base component hidden by this trait, when this
+     * is used with casting to a type, as PositionComponent, you can access underlying component fields
+     * @return {Ptr[Void]}
+     */
     public function base(): Ptr[Void]{
         return &this;
     }
 }
 
+/**
+ * System trait, any system must implement this
+ */
 trait System {
     public static var engine: Ptr[Engine]; 
+
+    /**
+     * Update function once per iteration, based on delta time passed to engine.
+     * @param {Float} delta - The time since the last frame
+     * @param {Ptr[Engine]} engine - Reference to the engine this system belongs to, used for querying components
+     */
     public function update(delta: Float, engine: Ptr[Engine]): Void;
+
+    /**
+     * Return the unique type for this component, i.e "Position"
+     * @return {CString}
+     */
     public function typeIdentifier(): CString;
+
+    /**
+     * Returns a pointer to the base system hidden by this trait, when this
+     * is used with casting to a type, as MovementSystem, you can access underlying system field
+     * @return {Ptr[Void]}
+     */
     public function base(): Ptr[Void]{
         return &this;
     }
@@ -39,6 +78,7 @@ struct Entity {
     private var allocator: Box[Allocator];
     public var uniqueID: Int;
     public var name: CString;
+    private var tags: Set[CString];
     private var engine: Ptr[Engine];
     
     private static var id: Int = 0;
@@ -46,12 +86,14 @@ struct Entity {
     public static function new(allocator: Box[Allocator], name: CString): Entity using implicit allocator {
         var components = Map.new(10);
         var uniqueID: Int = Entity.id++;
+        var tags = Set.new();
 
         return struct Self {
             components,
             allocator,
             uniqueID,
             name,
+            tags
         };
     }
 
@@ -86,6 +128,18 @@ struct Entity {
             this.components.remove(typeIdentifier);
             this.notifiyChange(EntityState.COMPONENT_REMOVED, typeIdentifier);
         }
+    }
+
+    public function addTag(tag: CString): Void {
+        this.tags.put(tag);
+    }
+
+    public function hasTag(tag: CString): Bool {
+        if this.tags.exists(tag) then return true else return false;
+    }
+
+    public function removeTag(tag: CString): Void {
+        this.tags.remove(tag);
     }
 
     private function notifiyChange(change: EntityState, typeIdentifier: CString){
