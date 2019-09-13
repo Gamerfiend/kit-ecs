@@ -18,9 +18,9 @@ Next we should create an `Engine`, which is the entry point to the entire ECS st
 ```c
 var engine: Engine = Engine.new();
 ```
-An application will typically only have one `Engine`, an `Entity` can only have one `Engine`.
+An application will typically only have one `Engine`, and an `Entity` can only have one `Engine`.
 
-Adding the our `Entity` to the `Engine` is easy.
+Adding an `Entity` to an `Engine` is a simple call.
 ```c
 engine.addEntity(player);
 ```
